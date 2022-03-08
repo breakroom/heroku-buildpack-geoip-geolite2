@@ -23,6 +23,8 @@ GEOLITE2_CITY_FILENAME="GeoLite2-City.mmdb"
 GEOLITE2_CITY_TARBALL_FILENAME="GeoLite2-City.tar.gz"
 GEOLITE2_COUNTRY_FILENAME="GeoLite2-Country.mmdb"
 GEOLITE2_COUNTRY_TARBALL_FILENAME="GeoLite2-Country.tar.gz"
+GEOLITE2_ASN_FILENAME="GeoLite2-ASN.mmdb"
+GEOLITE2_ASN_TARBALL_FILENAME="GeoLite2-ASN.tar.gz"
 
 BUILD_DIST_DIR="$BUILD_DIR/.geoip"
 BUILD_DIST_SHARE_DIR="$BUILD_DIST_DIR/share"
@@ -39,7 +41,7 @@ mkdir -p "$BUILD_DIST_SHARE_DIR"
 mkdir -p "$GEOIP_CACHE_DIR"
 mkdir -p "$LIBMAXMINDDB_CACHE_DIST_DIR"
 
-echo "       Downloading GeoLite2 City and Country data"
+echo "       Downloading GeoLite2 City, Country and ASN data"
 
 # see https://dev.maxmind.com/geoip/geoipupdate/ (Direct Downloads version)
 wget --quiet --output-document "$GEOIP_CACHE_DIR/$GEOLITE2_CITY_TARBALL_FILENAME" \
@@ -48,10 +50,14 @@ wget --quiet --output-document "$GEOIP_CACHE_DIR/$GEOLITE2_CITY_TARBALL_FILENAME
 wget --quiet --output-document "$GEOIP_CACHE_DIR/$GEOLITE2_COUNTRY_TARBALL_FILENAME" \
      "https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-Country&license_key=$MAXMIND_LICENSE_KEY&suffix=tar.gz"
 
-echo "       Unzipping GeoLite2 City and Country data"
+wget --quiet --output-document "$GEOIP_CACHE_DIR/$GEOLITE2_ASN_TARBALL_FILENAME" \
+     "https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-ASN&license_key=$MAXMIND_LICENSE_KEY&suffix=tar.gz"
+
+echo "       Unzipping GeoLite2 City, Country and ASN data"
 
 tar -xvf "$GEOIP_CACHE_DIR/$GEOLITE2_CITY_TARBALL_FILENAME" --directory "$BUILD_DIST_SHARE_DIR" --no-anchored --strip-components=1 "$GEOLITE2_CITY_FILENAME"
 tar -xvf "$GEOIP_CACHE_DIR/$GEOLITE2_COUNTRY_TARBALL_FILENAME" --directory "$BUILD_DIST_SHARE_DIR" --no-anchored --strip-components=1 "$GEOLITE2_COUNTRY_FILENAME"
+tar -xvf "$GEOIP_CACHE_DIR/$GEOLITE2_ASN_TARBALL_FILENAME" --directory "$BUILD_DIST_SHARE_DIR" --no-anchored --strip-components=1 "$GEOLITE2_ASN_FILENAME"
 
 if [ -f "$LIBMAXMINDDB_CACHE_VERSION_FILE" ] && grep -Fxq "$LIBMAXMINDDB_VERSION" "$LIBMAXMINDDB_CACHE_VERSION_FILE"; then
     echo "       Using cached build of libmaxminddb-$LIBMAXMINDDB_VERSION"
@@ -84,13 +90,14 @@ fi
 
 cp -r "$LIBMAXMINDDB_CACHE_DIST_DIR/." "$BUILD_DIST_DIR"
 
-echo "       Set environment variables GEOIP_GEOLITE2_PATH, GEOIP_GEOLITE2_CITY_FILENAME, GEOIP_GEOLITE2_COUNTRY_FILENAME"
+echo "       Set environment variables GEOIP_GEOLITE2_PATH, GEOIP_GEOLITE2_CITY_FILENAME, GEOIP_GEOLITE2_COUNTRY_FILENAME, GEOIP_GEOLITE2_ASN_FILENAME"
 
 mkdir -p $BUILD_DIR/.profile.d
 cat <<EOF >$BUILD_DIR/.profile.d/geoip.sh
 export GEOIP_GEOLITE2_PATH="\$HOME/.geoip/share/"
 export GEOIP_GEOLITE2_CITY_FILENAME="$GEOLITE2_CITY_FILENAME"
 export GEOIP_GEOLITE2_COUNTRY_FILENAME="$GEOLITE2_COUNTRY_FILENAME"
+export GEOIP_GEOLITE2_ASN_FILENAME="$GEOLITE2_ASN_FILENAME"
 export LD_LIBRARY_PATH="\$HOME/.geoip/lib:\$LD_LIBRARY_PATH"
 export PATH="\$HOME/.geoip/bin:\$PATH"
 EOF
